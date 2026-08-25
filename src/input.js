@@ -25,6 +25,10 @@ export class InputHandler {
             if (e.code === 'Space') {
                 e.preventDefault();
             }
+            // Handle P key for pause (only when playing)
+            if (e.key === 'p' || e.key === 'P') {
+                this.pauseRequested = true;
+            }
         });
         
         window.addEventListener('keyup', (e) => {
@@ -72,6 +76,15 @@ export class InputHandler {
     update() {
         // No continuous update needed for this simple input handler
         // State is updated via event listeners
+    }
+    
+    // Check if pause was requested this frame
+    wasPauseRequested() {
+        if (this.pauseRequested) {
+            this.pauseRequested = false;
+            return true;
+        }
+        return false;
     }
     
     // Check if a key is currently pressed

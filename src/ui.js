@@ -1,4 +1,6 @@
 // Super Buster Bros - UI Manager
+import { safeInt, formatScore } from './sanitize.js';
+
 export class UIManager {
     constructor(game) {
         this.game = game;
@@ -9,7 +11,7 @@ export class UIManager {
             gameover: document.getElementById('gameover-screen'),
             levelcomplete: document.getElementById('levelcomplete-screen')
         };
-        
+
         // UI elements
         this.scoreValue = document.getElementById('score-value');
         this.levelValue = document.getElementById('level-value');
@@ -32,9 +34,15 @@ export class UIManager {
         this.nextLevelBtn = document.getElementById('next-level-btn');
         this.startBtn = document.getElementById('start-btn');
         
+        // Stats display elements (on start screen)
+        this.startHighScore = document.getElementById('start-high-score');
+        this.startHighestLevel = document.getElementById('start-highest-level');
+        this.startArcadeScore = document.getElementById('start-arcade-score');
+        this.startPanicScore = document.getElementById('start-panic-score');
+
         // Bind UI events
         this.bindEvents();
-        
+
         // Initialize
         this.reset();
     }
@@ -164,7 +172,7 @@ export class UIManager {
         
         // Update lives
         if (this.livesDisplay) {
-            this.livesDisplay.innerHTML = ''; // Clear
+            this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
             for (let i = 0; i < this.game.state.lives; i++) {
                 const life = document.createElement('div');
                 life.className = 'life';
@@ -202,26 +210,29 @@ export class UIManager {
             this.finalScore.textContent = this.game.state.score.toString().padStart(7, '0');
         }
         
-        // Update high score
-        if (this.highScoreValue && this.highScoreDisplay) {
-            const highScore = localStorage.getItem('superbusterhighscore') || 0;
-            this.highScoreValue.textContent = highScore.toString().padStart(7, '0');
+        // Update high score (use StorageManager for consistent data handling)
+        if (this.highScoreValue && this.highScoreDisplay && this.game.storageManager) {
+            const highScore = this.game.storageManager.getHighScore(this.game.state.mode);
+            this.highScoreValue.textContent = formatScore(highScore);
             // Show if we have a high score (greater than 0)
             this.highScoreDisplay.style.display = highScore > 0 ? 'block' : 'none';
         }
     }
     
     updateLevelCompleteScreen() {
-        // Update level score
-        if (this.levelScore) {
-            // This would be set by the scoring manager
-            this.levelScore.textContent = '0000000'; // Placeholder
+        // Update level score - use scoring manager if available
+        if (this.levelScore && this.game && this.game.scoringManager) {
+            this.levelScore.textContent = formatScore(this.game.scoringManager.levelScore);
+        } else if (this.levelScore) {
+            this.levelScore.textContent = '0000000'; // Fallback
         }
         
-        // Update level bonus
-        if (this.levelBonus) {
-            // This would be set by the scoring manager
-            this.levelBonus.textContent = '000000'; // Placeholder
+        // Update level bonus - use scoring manager if available
+        if (this.levelBonus && this.game && this.game.scoringManager) {
+            const bonus = this.game.scoringManager.getLevelCompleteBonus();
+            this.levelBonus.textContent = formatScore(bonus, 6);
+        } else if (this.levelBonus) {
+            this.levelBonus.textContent = '000000'; // Fallback
         }
     }
     
@@ -229,9 +240,34 @@ export class UIManager {
         // Nothing to update for pause screen currently
     }
     
+    updateStartScreenStats() {
+        if (this.game && this.game.storageManager) {
+            // All values below originate from localStorage -> untrusted, coerce.
+            // Update overall high score
+            if (this.startHighScore) {
+                this.startHighScore.textContent = formatScore(this.game.storageManager.getHighScore());
+            }
+            
+            // Update highest level
+            if (this.startHighestLevel) {
+                this.startHighestLevel.textContent = formatScore(this.game.storageManager.getHighestLevel(), 2);
+            }
+            
+            // Update arcade best score
+            if (this.startArcadeScore) {
+                this.startArcadeScore.textContent = formatScore(this.game.storageManager.getHighScore('arcade'));
+            }
+            
+            // Update panic best score
+            if (this.startPanicScore) {
+                this.startPanicScore.textContent = formatScore(this.game.storageManager.getHighScore('panic'));
+            }
+        }
+    }
+    
     updateLives(lives) {
         if (this.livesDisplay) {
-            this.livesDisplay.innerHTML = ''; // Clear
+            this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
             for (let i = 0; i < lives; i++) {
                 const life = document.createElement('div');
                 life.className = 'life';
@@ -241,21 +277,24 @@ export class UIManager {
     }
     
     reset() {
-        // Reset UI to initial state
-        this.showScreen('start');
+            // Reset UI to initial state
+            this.showScreen('start');
         
-        // Reset mode indicator to show default mode (panic as per requirement)
-        if (this.modeIndicator) {
-            this.modeIndicator.textContent = 'PANIC';
-            this.modeIndicator.className = 'hud-value neon';
+            // Update stats display on start screen
+            this.updateStartScreenStats();
+
+            // Reset mode indicator to show default mode (panic as per requirement)
+            if (this.modeIndicator) {
+                this.modeIndicator.textContent = 'PANIC';
+                this.modeIndicator.className = 'hud-value neon';
+            }
+
+            // Hide timer and panic bar initially
+            if (this.timerContainer) {
+                this.timerContainer.style.display = 'none';
+            }
+            if (this.panicBarContainer) {
+                this.panicBarContainer.style.display = 'none';
+            }
         }
-        
-        // Hide timer and panic bar initially
-        if (this.timerContainer) {
-            this.timerContainer.style.display = 'none';
-        }
-        if (this.panicBarContainer) {
-            this.panicBarContainer.style.display = 'none';
-        }
-    }
 }

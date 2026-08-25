@@ -60,6 +60,11 @@ export class AudioManager {
         };
     }
     
+    playSound(type) {
+        // Public alias that dispatches to playSoundEffect
+        this.playSoundEffect(type);
+    }
+
     playSoundEffect(type) {
         if (!this.audioContext) return;
         

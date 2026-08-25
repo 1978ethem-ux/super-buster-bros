@@ -1,4 +1,7 @@
 // Super Buster Bros - Scoring Manager
+import { safeInt, formatScore } from './sanitize.js';
+import { StorageManager } from './storage.js';
+
 export class ScoringManager {
     constructor(game) {
         this.game = game;
@@ -8,6 +11,7 @@ export class ScoringManager {
         this.comboTimer = 0;
         this.comboDuration = 2.0; // seconds to maintain combo
         this.lastBubbleColor = null;
+        this.storageManager = new StorageManager();
     }
     
     reset() {
@@ -105,23 +109,24 @@ export class ScoringManager {
     }
     
     checkHighScore() {
-        // Check if current score beats high score
-        const highScore = localStorage.getItem('superbusterhighscore') || 0;
+        // Check if current score beats high score.
+        // Use StorageManager for consistent data handling
+        const highScore = this.storageManager.getHighScore(this.game.state.mode);
         if (this.score > highScore) {
-            localStorage.setItem('superbusterhighscore', this.score);
+            this.storageManager.setHighScore(this.score, this.game.state.mode);
             this.updateHighScoreDisplay();
         }
     }
     
     updateHighScoreDisplay() {
-        const highScore = localStorage.getItem('superbusterhighscore') || 0;
+        const highScore = this.storageManager.getHighScore(this.game.state.mode);
         const highScoreElement = document.getElementById('high-score-value');
         if (highScoreElement) {
-            highScoreElement.textContent = highScore.toString().padStart(7, '0');
+            highScoreElement.textContent = formatScore(highScore);
             // Show high score display if we have a high score
             const highScoreDisplay = document.getElementById('high-score-display');
             if (highScoreDisplay) {
-                highScoreDisplay.style.display = 'block';
+                highScoreDisplay.style.display = highScore > 0 ? 'block' : 'none';
             }
         }
     }

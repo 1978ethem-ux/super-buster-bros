@@ -3,8 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <!-- Security: restrict what this page is allowed to load/execute.
+         - script-src 'self': only ./src/*.js modules; blocks any injected inline script.
+         - style-src needs 'unsafe-inline' because the UI sets element.style.* at
+           runtime and the markup uses inline style="display:none" attributes.
+         - Google Fonts serves CSS from fonts.googleapis.com and the font files
+           from fonts.gstatic.com; both must be allowed while the font is hosted
+           remotely. Self-host the font to drop these two origins entirely.
+         Note: frame-ancestors and X-Frame-Options cannot be set via <meta>;
+         they require real response headers (unavailable on GitHub Pages). -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src https://fonts.gstatic.com;
+        img-src 'self' data:;
+        connect-src 'none';
+        object-src 'none';
+        base-uri 'none';
+        form-action 'none';
+        manifest-src 'self';
+        upgrade-insecure-requests">
+    <meta name="referrer" content="no-referrer">
+
     <title>Super Buster Bros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap"
+          rel="stylesheet" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -19,6 +46,24 @@
                 <div class="mode-select">
                     <button class="btn-neon btn-mode" data-mode="arcade">ARCADE MODE</button>
                     <button class="btn-neon btn-mode active" data-mode="panic">PANIC MODE</button>
+                </div>
+                <div class="stats-display" id="stats-display">
+                    <div class="stat-group">
+                        <span class="stat-label">HIGH SCORE</span>
+                        <span class="stat-value neon" id="start-high-score">0000000</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">HIGHEST LEVEL</span>
+                        <span class="stat-value neon" id="start-highest-level">01</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">ARCADE BEST</span>
+                        <span class="stat-value neon" id="start-arcade-score">0000000</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">PANIC BEST</span>
+                        <span class="stat-value neon" id="start-panic-score">0000000</span>
+                    </div>
                 </div>
                 <div class="controls-info">
                     <div class="control-row"><kbd>←</kbd><kbd>→</kbd> MOVE</div>

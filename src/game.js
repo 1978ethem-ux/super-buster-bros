@@ -7,6 +7,7 @@ import { ScoringManager } from './scoring.js';
 import { UIManager } from './ui.js';
 import { AudioManager } from './audio.js';
 import { ParticleManager } from './particles.js';
+import { StorageManager } from './storage.js';
 
 export class Game {
     constructor() {
@@ -38,6 +39,7 @@ export class Game {
         this.uiManager = new UIManager(this);
         this.audioManager = new AudioManager();
         this.particleManager = new ParticleManager(this);
+        this.storageManager = new StorageManager();
         
         // Game loop
         this.lastTime = 0;
@@ -94,13 +96,28 @@ export class Game {
         const deltaTime = (timestamp - this.lastTime) / 1000; // Convert to seconds
         this.lastTime = timestamp;
         
-        // Update
-        if (!this.state.isPaused && this.state.current === 'playing') {
-            this.update(deltaTime);
+        try {
+            // Update
+            if (!this.state.isPaused && this.state.current === 'playing') {
+                // Check for pause request
+                if (this.input.wasPauseRequested()) {
+                    this.pauseGame();
+                } else {
+                    this.update(deltaTime);
+                }
+            } else if (this.state.current === 'paused') {
+                // Allow resume from pause screen
+                if (this.input.wasPauseRequested()) {
+                    this.resumeGame();
+                }
+            }
+            
+            // Render
+            this.render();
+        } catch (error) {
+            // Log error but keep the game loop alive
+            console.error('Game loop error:', error);
         }
-        
-        // Render
-        this.render();
         
         // Request next frame
         requestAnimationFrame(this.gameLoop);
@@ -114,6 +131,15 @@ export class Game {
         this.collisionHandler.update();
         this.scoringManager.update(deltaTime);
         this.particleManager.update(deltaTime);
+        
+        // Update arcade mode timer
+        if (this.state.mode === 'arcade') {
+            this.state.timer += deltaTime;
+            // Check for timer expiry (5 minutes = 300 seconds)
+            if (this.state.timer >= 300) {
+                this.playerDied(); // Timer expired - lose a life
+            }
+        }
         
         // Check for level completion
         if (this.state.mode === 'arcade' && this.bubbleManager.bubbles.length === 0) {
@@ -181,32 +207,47 @@ export class Game {
     }
     
     completeLevel() {
-        this.state.current = 'levelcomplete';
-        this.state.isLevelComplete = true;
-        
-        // Calculate bonus
-        const timeBonus = this.state.mode === 'arcade' ? Math.max(0, (300 - this.state.timer) * 10) : 0;
-        const scoreBonus = this.state.score * 0.1; // 10% bonus
-        
-        this.scoringManager.addScore(timeBonus + scoreBonus);
-        
-        // Show level complete screen
-        this.uiManager.showScreen('levelcomplete');
-        
-        // Play level complete sound
-        this.audioManager.playSound('level_complete');
-    }
+            this.state.current = 'levelcomplete';
+            this.state.isLevelComplete = true;
+
+            // Calculate bonus
+            const timeBonus = this.state.mode === 'arcade' ? Math.max(0, (300 - this.state.timer) * 10) : 0;
+            const scoreBonus = Math.floor(this.state.score * 0.1); // 10% bonus
+
+            // Store for UI display
+            this.state.levelScore = this.scoringManager.levelScore;
+            this.state.levelTimeBonus = timeBonus;
+            this.state.levelScoreBonus = scoreBonus;
+
+            this.scoringManager.addScore(timeBonus + scoreBonus);
+
+            // Save level progress
+            this.storageManager.setHighestLevel(this.state.level + 1, this.state.mode);
+
+            // Show level complete screen
+            this.uiManager.showScreen('levelcomplete');
+
+            // Play level complete sound
+            this.audioManager.playSound('level_complete');
+        }
     
     gameOver() {
-        this.state.current = 'gameover';
-        this.state.isGameOver = true;
+            this.state.current = 'gameover';
+            this.state.isGameOver = true;
+
+            // Save high score and level progress
+            this.storageManager.setHighScore(this.state.score, this.state.mode);
+            this.storageManager.setHighestLevel(this.state.level, this.state.mode);
         
-        // Show game over screen
-        this.uiManager.showScreen('gameover');
-        
-        // Play game over sound
-        this.audioManager.playSound('game_over');
-    }
+            // Record game statistics
+            this.storageManager.recordGamePlayed(this.state.score, this.bubbleManager.getPoppedCount ? this.bubbleManager.getPoppedCount() : 0);
+
+            // Show game over screen
+            this.uiManager.showScreen('gameover');
+
+            // Play game over sound
+            this.audioManager.playSound('game_over');
+        }
     
     pauseGame() {
         if (this.state.current === 'playing') {
