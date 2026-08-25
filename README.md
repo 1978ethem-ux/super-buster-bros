@@ -22,8 +22,12 @@ Super Buster Bros. is a fixed-screen shooter/puzzle hybrid where players control
 ## Controls
 - **← / →** or **A / D**: Move left/right
 - **Spacebar**: Shoot harpoon upward
-- **P**: Pause game
+- **P**: Pause/resume game
 - **Mouse/Touch**: Click or tap to start game from start screen
+- **Mobile Touch Controls**: 
+  - Tap left side of screen to move left
+  - Tap right side of screen to move right
+  - Tap center of screen to shoot
 
 ## How to Play
 1. Open `index.html` in a modern web browser

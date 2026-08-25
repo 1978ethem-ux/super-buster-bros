@@ -90,6 +90,9 @@ export class Game {
         this.height = 320; // Base height
         this.scaleX = this.canvas.width / this.width;
         this.scaleY = this.canvas.height / this.height;
+        
+        // Update touch zones for mobile controls
+        this.input.updateTouchZones();
     }
     
     gameLoop(timestamp) {
@@ -195,6 +198,9 @@ export class Game {
         
         // Load level
         this.loadLevel(this.state.level);
+        
+        // Initialize touch zones for mobile
+        this.input.updateTouchZones();
         
         // Hide start screen, show HUD
         this.uiManager.showScreen('hud');

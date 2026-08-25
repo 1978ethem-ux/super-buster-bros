@@ -6,7 +6,7 @@ export class BubbleManager {
         this.projectiles = []; // Player's harpoons
         this.bubbleSizes = [
             { radius: 20, points: 1000, color: '#ff0000' }, // Large (Red)
-            { radius: 15, points: 500, color: '#00ff00ff00' }, // Medium (Green)
+            { radius: 15, points: 500, color: '#00ff00' }, // Medium (Green)
             { radius: 10, points: 250, color: '#0000ff' }, // Small (Blue)
             { radius: 5, points: 100, color: '#ffff00' }   // Tiny (Yellow) - pops on hit
         ];

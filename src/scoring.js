@@ -1,6 +1,5 @@
 // Super Buster Bros - Scoring Manager
 import { safeInt, formatScore } from './sanitize.js';
-import { StorageManager } from './storage.js';
 
 export class ScoringManager {
     constructor(game) {
@@ -11,7 +10,8 @@ export class ScoringManager {
         this.comboTimer = 0;
         this.comboDuration = 2.0; // seconds to maintain combo
         this.lastBubbleColor = null;
-        this.storageManager = new StorageManager();
+        // Use the game's storage manager instance for consistency
+        this.storageManager = game.storageManager;
     }
     
     reset() {

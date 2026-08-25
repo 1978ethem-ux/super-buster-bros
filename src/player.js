@@ -40,12 +40,12 @@ export class Player {
         
         // Movement
         let moving = false;
-        if (input.isKeyPressed('ArrowLeft') || input.isKeyPressed('a')) {
+        if (input.isKeyPressed('ArrowLeft') || input.isKeyPressed('a') || input.isTouchLeft()) {
             this.x -= this.speed * deltaTime;
             moving = true;
             this.facingRight = false;
         }
-        if (input.isKeyPressed('ArrowRight') || input.isKeyPressed('d')) {
+        if (input.isKeyPressed('ArrowRight') || input.isKeyPressed('d') || input.isTouchRight()) {
             this.x += this.speed * deltaTime;
             moving = true;
             this.facingRight = true;
@@ -55,7 +55,7 @@ export class Player {
         this.x = Math.max(0, Math.min(this.game.width - this.width, this.x));
         
         // Shooting
-        if ((input.isKeyPressed(' ') || input.isKeyPressed('Space')) && this.canShoot) {
+        if ((input.isKeyPressed(' ') || input.isKeyPressed('Space') || input.isTouchShoot()) && this.canShoot) {
             this.shoot();
             this.canShoot = false;
             this.shootTimer = this.shootCooldown;
