@@ -1,0 +1,261 @@
+// Super Buster Bros - UI Manager
+export class UIManager {
+    constructor(game) {
+        this.game = game;
+        this.screens = {
+            start: document.getElementById('start-screen'),
+            hud: document.getElementById('hud'),
+            pause: document.getElementById('pause-screen'),
+            gameover: document.getElementById('gameover-screen'),
+            levelcomplete: document.getElementById('levelcomplete-screen')
+        };
+        
+        // UI elements
+        this.scoreValue = document.getElementById('score-value');
+        this.levelValue = document.getElementById('level-value');
+        this.modeIndicator = document.getElementById('mode-indicator');
+        this.livesDisplay = document.getElementById('lives-display');
+        this.timerValue = document.getElementById('timer-value');
+        this.timerContainer = document.getElementById('timer-container');
+        this.panicBarFill = document.getElementById('panic-bar-fill');
+        this.panicBarContainer = document.getElementById('panic-bar-container');
+        this.finalScore = document.getElementById('final-score');
+        this.highScoreValue = document.getElementById('high-score-value');
+        this.highScoreDisplay = document.getElementById('high-score-display');
+        this.levelScore = document.getElementById('level-score');
+        this.levelBonus = document.getElementById('level-bonus');
+        this.retryBtn = document.getElementById('retry-btn');
+        this.menuBtn = document.getElementById('menu-btn');
+        this.menuBtn2 = document.getElementById('menu-btn-2');
+        this.resumeBtn = document.getElementById('resume-btn');
+        this.restartBtn = document.getElementById('restart-btn');
+        this.nextLevelBtn = document.getElementById('next-level-btn');
+        this.startBtn = document.getElementById('start-btn');
+        
+        // Bind UI events
+        this.bindEvents();
+        
+        // Initialize
+        this.reset();
+    }
+    
+    bindEvents() {
+        // Start button
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => {
+                this.game.startGame();
+            });
+        }
+        
+        // Pause screen buttons
+        if (this.resumeBtn) {
+            this.resumeBtn.addEventListener('click', () => {
+                this.game.resumeGame();
+            });
+        }
+        
+        if (this.restartBtn) {
+            this.restartBtn.addEventListener('click', () => {
+                this.game.startGame(); // Restart current game
+            });
+        }
+        
+        if (this.menuBtn) {
+            this.menuBtn.addEventListener('click', () => {
+                this.game.returnToMenu();
+            });
+        }
+        
+        // Game over screen buttons
+        if (this.retryBtn) {
+            this.retryBtn.addEventListener('click', () => {
+                this.game.startGame(); // Retry from beginning
+            });
+        }
+        
+        if (this.menuBtn2) {
+            this.menuBtn2.addEventListener('click', () => {
+                this.game.returnToMenu();
+            });
+        }
+        
+        // Level complete screen buttons
+        if (this.nextLevelBtn) {
+            this.nextLevelBtn.addEventListener('click', () => {
+                this.game.state.level++;
+                this.game.startGame(); // Start next level
+            });
+        }
+        
+        // Mode selection buttons (in start screen)
+        const modeButtons = document.querySelectorAll('.btn-mode');
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active class from all buttons
+                modeButtons.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                // Update game mode
+                this.game.state.mode = e.target.dataset.mode;
+            });
+        });
+    }
+    
+    showScreen(screenName) {
+        // Hide all screens
+        Object.values(this.screens).forEach(screen => {
+            screen.classList.remove('active');
+            screen.style.display = 'none';
+        });
+        
+        // Show the requested screen
+        const screen = this.screens[screenName];
+        if (screen) {
+            screen.classList.add('active');
+            screen.style.display = 'flex';
+            
+            // Update screen-specific content
+            this.updateScreenContent(screenName);
+        }
+    }
+    
+    updateScreenContent(screenName) {
+        switch (screenName) {
+            case 'hud':
+                this.updateHUD();
+                break;
+            case 'gameover':
+                this.updateGameOverScreen();
+                break;
+            case 'levelcomplete':
+                this.updateLevelCompleteScreen();
+                break;
+            case 'pause':
+                this.updatePauseScreen();
+                break;
+            default:
+                break;
+        }
+    }
+    
+    updateHUD() {
+        // Update score
+        if (this.scoreValue) {
+            this.scoreValue.textContent = this.game.state.score.toString().padStart(7, '0');
+        }
+        
+        // Update level
+        if (this.levelValue) {
+            this.levelValue.textContent = this.game.state.level.toString().padStart(2, '0');
+        }
+        
+        // Update mode indicator
+        if (this.modeIndicator) {
+            const modeText = this.game.state.mode === 'arcade' ? 'ARCADE' : 'PANIC';
+            this.modeIndicator.textContent = modeText;
+            // Add appropriate styling
+            this.modeIndicator.className = 'hud-value';
+            if (this.game.state.mode === 'arcade') {
+                this.modeIndicator.classList.add('neon');
+            } else {
+                this.modeIndicator.classList.add('neon'); // Both modes use neon for now
+            }
+        }
+        
+        // Update lives
+        if (this.livesDisplay) {
+            this.livesDisplay.innerHTML = ''; // Clear
+            for (let i = 0; i < this.game.state.lives; i++) {
+                const life = document.createElement('div');
+                life.className = 'life';
+                this.livesDisplay.appendChild(life);
+            }
+        }
+        
+        // Update timer (arcade mode only)
+        if (this.timerContainer && this.timerValue) {
+            if (this.game.state.mode === 'arcade') {
+                this.timerContainer.style.display = 'block';
+                const minutes = Math.floor(this.game.state.timer / 60);
+                const seconds = Math.floor(this.game.state.timer % 60);
+                this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                this.timerContainer.style.display = 'none';
+            }
+        }
+        
+        // Update panic bar (panic mode only)
+        if (this.panicBarContainer && this.panicBarFill) {
+            if (this.game.state.mode === 'panic') {
+                this.panicBarContainer.style.display = 'block';
+                const progress = Math.min(this.game.state.panicProgress, 100);
+                this.panicBarFill.style.width = `${progress}%`;
+            } else {
+                this.panicBarContainer.style.display = 'none';
+            }
+        }
+    }
+    
+    updateGameOverScreen() {
+        // Update final score
+        if (this.finalScore) {
+            this.finalScore.textContent = this.game.state.score.toString().padStart(7, '0');
+        }
+        
+        // Update high score
+        if (this.highScoreValue && this.highScoreDisplay) {
+            const highScore = localStorage.getItem('superbusterhighscore') || 0;
+            this.highScoreValue.textContent = highScore.toString().padStart(7, '0');
+            // Show if we have a high score (greater than 0)
+            this.highScoreDisplay.style.display = highScore > 0 ? 'block' : 'none';
+        }
+    }
+    
+    updateLevelCompleteScreen() {
+        // Update level score
+        if (this.levelScore) {
+            // This would be set by the scoring manager
+            this.levelScore.textContent = '0000000'; // Placeholder
+        }
+        
+        // Update level bonus
+        if (this.levelBonus) {
+            // This would be set by the scoring manager
+            this.levelBonus.textContent = '000000'; // Placeholder
+        }
+    }
+    
+    updatePauseScreen() {
+        // Nothing to update for pause screen currently
+    }
+    
+    updateLives(lives) {
+        if (this.livesDisplay) {
+            this.livesDisplay.innerHTML = ''; // Clear
+            for (let i = 0; i < lives; i++) {
+                const life = document.createElement('div');
+                life.className = 'life';
+                this.livesDisplay.appendChild(life);
+            }
+        }
+    }
+    
+    reset() {
+        // Reset UI to initial state
+        this.showScreen('start');
+        
+        // Reset mode indicator to show default mode (panic as per requirement)
+        if (this.modeIndicator) {
+            this.modeIndicator.textContent = 'PANIC';
+            this.modeIndicator.className = 'hud-value neon';
+        }
+        
+        // Hide timer and panic bar initially
+        if (this.timerContainer) {
+            this.timerContainer.style.display = 'none';
+        }
+        if (this.panicBarContainer) {
+            this.panicBarContainer.style.display = 'none';
+        }
+    }
+}

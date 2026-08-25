@@ -1,0 +1,428 @@
+/* Super Buster Bros - Modern Neon UI Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a001a 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: manipulation; /* Prevent double-tap zoom on mobile */
+}
+
+#game-container {
+    width: 480px;
+    height: 320px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 255, 0.2);
+}
+
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Neon glow effect */
+.neon {
+    text-shadow: 
+        0 0 5px #00ffff,
+        0 0 10px #00ffff,
+        0 0 15px #00ffff,
+        0 0 20px #00ffff;
+}
+
+/* Screen management */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    pointer-events: none; /* Will be enabled when visible */
+}
+
+.screen.active {
+    display: flex;
+    pointer-events: all;
+}
+
+/* Start Screen */
+#start-screen h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    class: neon;
+}
+
+#start-screen p {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+    animation: pulse 2s infinite;
+}
+
+.btn-start {
+    background: linear-gradient(45deg, #00ffff, #ff00ff);
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.btn-start:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+}
+
+.mode-select {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-mode {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    padding: 8px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-mode:hover {
+    background: rgba(0, 255, 255, 0.3);
+}
+
+.btn-mode.active {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.controls-info {
+    margin-top: 30px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.control-row {
+    margin: 4px 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.kbd {
+    background: #000;
+    color: #0ff;
+    border: 1px solid #0ff;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: monospace;
+}
+
+/* HUD */
+#hud {
+    background: rgba(0, 0, 0, 0.3);
+    justify-content: space-between;
+    padding: 15px;
+}
+
+.hud-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hud-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hud-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    min-width: 80px;
+    text-align: right;
+}
+
+.hud-value.neon {
+    color: #00ffff;
+}
+
+.hud-value.warning {
+    color: #ff0040;
+    animation: pulse-warning 1s infinite;
+}
+
+/* Lives display */
+.lives {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.life {
+    width: 16px;
+    height: 16px;
+    background: #ff0040;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 0, 64, 0.5);
+}
+
+/* Mode indicator */
+#mode-indicator {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Timer */
+#timer-container {
+    display: none; /* Only show in arcade mode */
+}
+
+/* Panic Bar */
+#panic-bar-container {
+    display: none; /* Only show in panic mode */
+}
+
+.panic-bar {
+    width: 200px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 2px solid rgba(0, 255, 255, 0.2);
+}
+
+.panic-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ffff, #ff00ff);
+    width: 0%;
+    transition: width 0.2s ease;
+}
+
+/* Pause Screen */
+#pause-screen {
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10;
+}
+
+#pause-screen h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+    class: neon;
+}
+
+.btn-pause {
+    background: rgba(0, 255, 255, 0.2);
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    padding: 10px 20px;
+    margin: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.btn-pause:hover {
+    background: rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.btn-pause:active {
+    transform: translateY(0);
+}
+
+/* Game Over Screen */
+#gameover-screen {
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10;
+}
+
+.warning {
+    color: #ff0040;
+    animation: pulse-warning 1s infinite;
+}
+
+.final-score, .high-score {
+    margin: 20px 0;
+    text-align: center;
+}
+
+#high-score-display {
+    display: none; /* Show only if high score is beaten */
+}
+
+/* Level Complete Screen */
+#levelcomplete-screen {
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10;
+}
+
+.success {
+    color: #00ff00;
+    animation: pulse-success 1s infinite;
+}
+
+.level-stats {
+    display: flex;
+    justify-content: space-around;
+    width: 80%;
+    margin: 20px 0;
+}
+
+.stat {
+    text-align: center;
+}
+
+/* Color Palette Display */
+.palette {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+.palette-label {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.swatches {
+    display: flex;
+    gap: 4px;
+}
+
+.swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 8px rgba(0,255,255,0.3);
+}
+
+.swatch-cyan { background: #00ffff; }
+.swatch-magenta { background: #ff00ff; }
+.swatch-yellow { background: #ffff00; }
+.swatch-purple { background: #8a2be2; }
+.swatch-black { background: #000; border: 2px solid #333; }
+
+/* Footer Info */
+.info {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 0.7rem;
+    opacity: 0.6;
+    text-align: right;
+    line-height: 1.4;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+@keyframes pulse-success {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Responsive considerations */
+@media (max-width: 500px) {
+    #game-container {
+        width: 90vw;
+        height: 60vw;
+        max-height: 400px;
+    }
+    
+    #hud {
+        padding: 10px;
+    }
+    
+    .hud-label {
+        font-size: 0.7rem;
+    }
+    
+    .hud-value {
+        font-size: 0.9rem;
+        min-width: 60px;
+    }
+    
+    .btn-start {
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
+    
+    .btn-mode, .btn-pause {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .panic-bar {
+        width: 150px;
+        height: 10px;
+    }
+}
+
+/* Hide UI elements on canvas for pure gameplay when needed */
+#game-container:hover #ui-overlay {
+    opacity: 0.8;
+}
+
+#game-container:hover #ui-overlay:hover {
+    opacity: 1;
+}

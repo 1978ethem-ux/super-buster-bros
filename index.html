@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Super Buster Bros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-overlay">
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <h1 class="neon-title">SUPER BUSTER BROS</h1>
+                <p class="start-prompt">INSERT COIN TO BEGIN</p>
+                <button class="btn-neon btn-start" id="start-btn">START GAME</button>
+                <div class="mode-select">
+                    <button class="btn-neon btn-mode" data-mode="arcade">ARCADE MODE</button>
+                    <button class="btn-neon btn-mode active" data-mode="panic">PANIC MODE</button>
+                </div>
+                <div class="controls-info">
+                    <div class="control-row"><kbd>←</kbd><kbd>→</kbd> MOVE</div>
+                    <div class="control-row"><kbd>SPACE</kbd> SHOOT</div>
+                    <div class="control-row"><kbd>P</kbd> PAUSE</div>
+                </div>
+            </div>
+
+            <!-- HUD -->
+            <div id="hud" class="screen" style="display: none;">
+                <div class="hud-left">
+                    <div class="hud-item">
+                        <span class="hud-label">SCORE</span>
+                        <span class="hud-value neon" id="score-value">0000000</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">LEVEL</span>
+                        <span class="hud-value neon" id="level-value">01</span>
+                    </div>
+                </div>
+                <div class="hud-center" id="mode-indicator"></div>
+                <div class="hud-right">
+                    <div class="hud-item">
+                        <span class="hud-label">LIVES</span>
+                        <div class="lives" id="lives-display"></div>
+                    </div>
+                    <div class="hud-item" id="timer-container" style="display: none;">
+                        <span class="hud-label">TIME</span>
+                        <span class="hud-value neon" id="timer-value">00:00</span>
+                    </div>
+                    <div class="hud-item" id="panic-bar-container" style="display: none;">
+                        <span class="hud-label">PROGRESS</span>
+                        <div class="panic-bar">
+                            <div class="panic-bar-fill" id="panic-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pause-screen" class="screen" style="display: none;">
+                <h2 class="neon-title">GAME PAUSED</h2>
+                <button class="btn-neon btn-pause" id="resume-btn">RESUME</button>
+                <button class="btn-neon btn-pause" id="restart-btn">RESTART</button>
+                <button class="btn-neon btn-pause" id="menu-btn">MAIN MENU</button>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="screen" style="display: none;">
+                <h2 class="neon-title warning">GAME OVER</h2>
+                <div class="final-score">
+                    <span class="hud-label">FINAL SCORE</span>
+                    <span class="hud-value neon" id="final-score">0000000</span>
+                </div>
+                <div class="high-score" id="high-score-display" style="display: none;">
+                    <span class="hud-label">HIGH SCORE</span>
+                    <span class="hud-value neon" id="high-score-value">0000000</span>
+                </div>
+                <button class="btn-neon btn-pause" id="retry-btn">RETRY</button>
+                <button class="btn-neon btn-pause" id="menu-btn-2">MAIN MENU</button>
+            </div>
+
+            <!-- Level Complete Screen -->
+            <div id="levelcomplete-screen" class="screen" style="display: none;">
+                <h2 class="neon-title success">LEVEL COMPLETE</h2>
+                <div class="level-stats">
+                    <div class="stat"><span class="hud-label">SCORE</span><span class="hud-value neon" id="level-score">0000000</span></div>
+                    <div class="stat"><span class="hud-label">BONUS</span><span class="hud-value neon" id="level-bonus">000000</span></div>
+                </div>
+                <button class="btn-neon btn-pause" id="next-level-btn">NEXT LEVEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
