@@ -135,6 +135,9 @@ export class Game {
         this.scoringManager.update(deltaTime);
         this.particleManager.update(deltaTime);
         
+        // Update HUD every frame
+        this.uiManager.updateHUD();
+        
         // Update arcade mode timer
         if (this.state.mode === 'arcade') {
             this.state.timer += deltaTime;

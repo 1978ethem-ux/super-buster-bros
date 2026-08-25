@@ -62,6 +62,10 @@ export class AudioManager {
     
     playSound(type) {
         // Public alias that dispatches to playSoundEffect
+        // Ensure audio context is resumed (required by browser autoplay policies)
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume().catch(e => console.warn('AudioContext resume failed:', e));
+        }
         this.playSoundEffect(type);
     }
 
