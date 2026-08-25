@@ -138,6 +138,9 @@ export class Game {
         // Update HUD every frame
         this.uiManager.updateHUD();
         
+        // Update timer display (only rewrites text node for better perf)
+        this.uiManager.updateTimer();
+        
         // Update arcade mode timer
         if (this.state.mode === 'arcade') {
             this.state.timer += deltaTime;

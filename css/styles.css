@@ -354,6 +354,41 @@ body {
 .swatch-purple { background: #8a2be2; }
 .swatch-black { background: #000; border: 2px solid #333; }
 
+/* Touch controls for mobile */
+.touch-zone {
+    position: absolute;
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.touch-glyph {
+    font-size: 2rem;
+    text-shadow: 
+        0 0 5px #00ffff,
+        0 0 10px #00ffff;
+}
+
+.touch-zone.left {
+    /* Positioned by JS */
+}
+
+.touch-zone.right {
+    /* Positioned by JS */
+}
+
+.touch-zone.shoot {
+    /* Positioned by JS */
+}
+
 /* Footer Info */
 .info {
     position: absolute;

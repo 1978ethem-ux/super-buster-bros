@@ -41,7 +41,10 @@ export class UIManager {
         this.startPanicScore = document.getElementById('start-panic-score');
 
         // Bind UI events
-        this.bindEvents();
+            this.bindEvents();
+    
+            // Create touch control visuals (only on touch devices)
+            this.createTouchControlVisuals();
 
         // Initialize
         this.reset();
@@ -147,60 +150,72 @@ export class UIManager {
     }
     
     updateHUD() {
-        // Update score
-        if (this.scoreValue) {
-            this.scoreValue.textContent = this.game.state.score.toString().padStart(7, '0');
-        }
-        
-        // Update level
-        if (this.levelValue) {
-            this.levelValue.textContent = this.game.state.level.toString().padStart(2, '0');
-        }
-        
-        // Update mode indicator
-        if (this.modeIndicator) {
-            const modeText = this.game.state.mode === 'arcade' ? 'ARCADE' : 'PANIC';
-            this.modeIndicator.textContent = modeText;
-            // Add appropriate styling
-            this.modeIndicator.className = 'hud-value';
-            if (this.game.state.mode === 'arcade') {
-                this.modeIndicator.classList.add('neon');
-            } else {
-                this.modeIndicator.classList.add('neon'); // Both modes use neon for now
+            // Update score
+            if (this.scoreValue) {
+                this.scoreValue.textContent = this.game.state.score.toString().padStart(7, '0');
+            }
+
+            // Update level
+            if (this.levelValue) {
+                this.levelValue.textContent = this.game.state.level.toString().padStart(2, '0');
+            }
+
+            // Update mode indicator
+            if (this.modeIndicator) {
+                const modeText = this.game.state.mode === 'arcade' ? 'ARCADE' : 'PANIC';
+                this.modeIndicator.textContent = modeText;
+                // Add appropriate styling
+                this.modeIndicator.className = 'hud-value';
+                if (this.game.state.mode === 'arcade') {
+                    this.modeIndicator.classList.add('neon');
+                } else {
+                    this.modeIndicator.classList.add('neon'); // Both modes use neon for now
+                }
+            }
+
+            // Update lives
+            if (this.livesDisplay) {
+                this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
+                for (let i = 0; i < this.game.state.lives; i++) {
+                    const life = document.createElement('div');
+                    life.className = 'life';
+                    this.livesDisplay.appendChild(life);
+                }
+            }
+
+            // Update timer (arcade mode only)
+            if (this.timerContainer && this.timerValue) {
+                if (this.game.state.mode === 'arcade') {
+                    this.timerContainer.style.display = 'block';
+                    const minutes = Math.floor(this.game.state.timer / 60);
+                    const seconds = Math.floor(this.game.state.timer % 60);
+                    this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    this.timerContainer.style.display = 'none';
+                }
+            }
+
+            // Update panic bar (panic mode only)
+            if (this.panicBarContainer && this.panicBarFill) {
+                if (this.game.state.mode === 'panic') {
+                    this.panicBarContainer.style.display = 'block';
+                    const progress = Math.min(this.game.state.panicProgress, 100);
+                    this.panicBarFill.style.width = `${progress}%`;
+                } else {
+                    this.panicBarContainer.style.display = 'none';
+                }
             }
         }
-        
-        // Update lives
-        if (this.livesDisplay) {
-            this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
-            for (let i = 0; i < this.game.state.lives; i++) {
-                const life = document.createElement('div');
-                life.className = 'life';
-                this.livesDisplay.appendChild(life);
-            }
-        }
-        
-        // Update timer (arcade mode only)
-        if (this.timerContainer && this.timerValue) {
-            if (this.game.state.mode === 'arcade') {
+
+    // Lightweight per-frame timer update (only rewrites text node)
+    updateTimer() {
+        if (this.timerContainer && this.timerValue && this.game.state.mode === 'arcade') {
+            if (this.timerContainer.style.display !== 'block') {
                 this.timerContainer.style.display = 'block';
-                const minutes = Math.floor(this.game.state.timer / 60);
-                const seconds = Math.floor(this.game.state.timer % 60);
-                this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } else {
-                this.timerContainer.style.display = 'none';
             }
-        }
-        
-        // Update panic bar (panic mode only)
-        if (this.panicBarContainer && this.panicBarFill) {
-            if (this.game.state.mode === 'panic') {
-                this.panicBarContainer.style.display = 'block';
-                const progress = Math.min(this.game.state.panicProgress, 100);
-                this.panicBarFill.style.width = `${progress}%`;
-            } else {
-                this.panicBarContainer.style.display = 'none';
-            }
+            const minutes = Math.floor(this.game.state.timer / 60);
+            const seconds = Math.floor(this.game.state.timer % 60);
+            this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
     }
     
@@ -278,23 +293,26 @@ export class UIManager {
     
     reset() {
             // Reset UI to initial state
-            this.showScreen('start');
+                    this.showScreen('start');
         
-            // Update stats display on start screen
-            this.updateStartScreenStats();
-
-            // Reset mode indicator to show default mode (panic as per requirement)
-            if (this.modeIndicator) {
-                this.modeIndicator.textContent = 'PANIC';
-                this.modeIndicator.className = 'hud-value neon';
-            }
-
-            // Hide timer and panic bar initially
-            if (this.timerContainer) {
-                this.timerContainer.style.display = 'none';
-            }
-            if (this.panicBarContainer) {
-                this.panicBarContainer.style.display = 'none';
-            }
+                    // Update stats display on start screen
+                    this.updateStartScreenStats();
+        
+                    // Reset mode indicator to show default mode (panic as per requirement)
+                    if (this.modeIndicator) {
+                        this.modeIndicator.textContent = 'PANIC';
+                        this.modeIndicator.className = 'hud-value neon';
+                    }
+        
+                    // Hide timer and panic bar initially
+                    if (this.timerContainer) {
+                        this.timerContainer.style.display = 'none';
+                    }
+                    if (this.panicBarContainer) {
+                        this.panicBarContainer.style.display = 'none';
+                    }
+        
+                    // Hide touch controls initially (they'll be shown on touch devices when needed)
+                    this.hideTouchControls();
         }
 }

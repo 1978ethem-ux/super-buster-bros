@@ -67,12 +67,20 @@ export class InputHandler {
             this.touch.y = touch.clientY;
             this.touch.active = true;
             
-            // Check if touch is in control zones (we'll handle this in updateTouchControls)
+            // Show touch controls when touch starts
+            if (this.game && this.game.uiManager && typeof this.game.uiManager.showTouchControls === 'function') {
+                this.game.uiManager.showTouchControls();
+            }
         }, { passive: false });
         
         window.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.touch.active = false;
+            
+            // Hide touch controls when touch ends
+            if (this.game && this.game.uiManager && typeof this.game.uiManager.hideTouchControls === 'function') {
+                this.game.uiManager.hideTouchControls();
+            }
         }, { passive: false });
         
         window.addEventListener('touchmove', (e) => {
