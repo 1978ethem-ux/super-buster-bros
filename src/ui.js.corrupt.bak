@@ -1,0 +1,323 @@
+// Super Buster Bros - UI Manager
+import { safeInt, formatScore } from './sanitize.js';
+
+export class UIManager {
+    constructor(game) {
+        this.game = game;
+        this.screens = {
+            start: document.getElementById('start-screen'),
+            hud: document.getElementById('hud'),
+            pause: document.getElementById('pause-screen'),
+            gameover: document.getElementById('gameover-screen'),
+            levelcomplete: document.getElementById('levelcomplete-screen')
+        };
+
+        // UI elements
+        this.scoreValue = document.getElementById('score-value');
+        this.levelValue = document.getElementById('level-value');
+        this.modeIndicator = document.getElementById('mode-indicator');
+        this.livesDisplay = document.getElementById('lives-display');
+        this.timerValue = document.getElementById('timer-value');
+        this.timerContainer = document.getElementById('timer-container');
+        this.panicBarFill = document.getElementById('panic-bar-fill');
+        this.panicBarContainer = document.getElementById('panic-bar-container');
+        this.finalScore = document.getElementById('final-score');
+        this.highScoreValue = document.getElementById('high-score-value');
+        this.highScoreDisplay = document.getElementById('high-score-display');
+        this.levelScore = document.getElementById('level-score');
+        this.levelBonus = document.getElementById('level-bonus');
+        this.retryBtn = document.getElementById('retry-btn');
+        this.menuBtn = document.getElementById('menu-btn');
+        this.menuBtn2 = document.getElementById('menu-btn-2');
+        this.resumeBtn = document.getElementById('resume-btn');
+        this.restartBtn = document.getElementById('restart-btn');
+        this.nextLevelBtn = document.getElementById('next-level-btn');
+        this.startBtn = document.getElementById('start-btn');
+        
+        // Stats display elements (on start screen)
+        this.startHighScore = document.getElementById('start-high-score');
+        this.startHighestLevel = document.getElementById('start-highest-level');
+        this.startArcadeScore = document.getElementById('start-arcade-score');
+        this.startPanicScore = document.getElementById('start-panic-score');
+
+        // Bind UI events
+            this.bindEvents();
+    
+            // Create touch control visuals (only on touch devices)
+            this.createTouchControlVisuals();
+
+        // Initialize
+        this.reset();
+    }
+    
+    bindEvents() {
+        // Start button
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => {
+                this.game.startGame();
+            });
+        }
+        
+        // Pause screen buttons
+        if (this.resumeBtn) {
+            this.resumeBtn.addEventListener('click', () => {
+                this.game.resumeGame();
+            });
+        }
+        
+        if (this.restartBtn) {
+            this.restartBtn.addEventListener('click', () => {
+                this.game.startGame(); // Restart current game
+            });
+        }
+        
+        if (this.menuBtn) {
+            this.menuBtn.addEventListener('click', () => {
+                this.game.returnToMenu();
+            });
+        }
+        
+        // Game over screen buttons
+        if (this.retryBtn) {
+            this.retryBtn.addEventListener('click', () => {
+                this.game.startGame(); // Retry from beginning
+            });
+        }
+        
+        if (this.menuBtn2) {
+            this.menuBtn2.addEventListener('click', () => {
+                this.game.returnToMenu();
+            });
+        }
+        
+        // Level complete screen buttons
+        if (this.nextLevelBtn) {
+            this.nextLevelBtn.addEventListener('click', () => {
+                this.game.state.level++;
+                this.game.startGame(); // Start next level
+            });
+        }
+        
+        // Mode selection buttons (in start screen)
+        const modeButtons = document.querySelectorAll('.btn-mode');
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active class from all buttons
+                modeButtons.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                // Update game mode
+                this.game.state.mode = e.target.dataset.mode;
+            });
+        });
+    }\n    \n    createTouchControlVisuals() {\n        // Only create touch controls on touch devices\n        if (!('ontouchstart' in window)) {\n            return;\n        }\n        \n        // Create touch zone container\n        const touchContainer = document.createElement('div');\n        touchContainer.id = 'touch-controls';\n        touchContainer.style.cssText = \n            'position: fixed;' +\n            'bottom: 0; left: 0; right: 0;' +\n            'padding: 10px;' +\n            'display: flex;' +\n            'justify-content: space-between;' +\n            'align-items: center;' +\n            'z-index: 100;' +\n            'pointer-events: none;';\n        \n        // Create left touch zone (move left)\n        const touchLeft = document.createElement('div');\n        touchLeft.className = 'touch-zone left';\n        touchLeft.style.cssText = 'width: 60px; height: 60px;';\n        const leftGlyph = document.createElement('span');\n        leftGlyph.className = 'touch-glyph';\n        leftGlyph.textContent = '←';\n        touchLeft.appendChild(leftGlyph);\n        \n        // Create right touch zone (move right)\n        const touchRight = document.createElement('div');\n        touchRight.className = 'touch-zone right';\n        touchRight.style.cssText = 'width: 60px; height: 60px;';\n        const rightGlyph = document.createElement('span');\n        rightGlyph.className = 'touch-glyph';\n        rightGlyph.textContent = '→';\n        touchRight.appendChild(rightGlyph);\n        \n        // Create shoot touch zone\n        const touchShoot = document.createElement('div');\n        touchShoot.className = 'touch-zone shoot';\n        touchShoot.style.cssText = 'width: 60px; height: 60px;';\n        const shootGlyph = document.createElement('span');\n        shootGlyph.className = 'touch-glyph';\n        shootGlyph.textContent = '🔫';\n        touchShoot.appendChild(shootGlyph);\n        \n        // Append zones to container\n        touchContainer.appendChild(touchLeft);\n        touchContainer.appendChild(touchRight);\n        touchContainer.appendChild(touchShoot);\n        \n        // Append container to body\n        document.body.appendChild(touchContainer);\n    }\n\n    showScreen(screenName) {
+        // Hide all screens
+        Object.values(this.screens).forEach(screen => {
+            screen.classList.remove('active');
+            screen.style.display = 'none';
+        });
+        
+        // Show the requested screen
+        const screen = this.screens[screenName];
+        if (screen) {
+            screen.classList.add('active');
+            screen.style.display = 'flex';
+            
+            // Update screen-specific content
+            this.updateScreenContent(screenName);
+        }
+    }
+    
+    updateScreenContent(screenName) {
+        switch (screenName) {
+            case 'hud':
+                this.updateHUD();
+                break;
+            case 'gameover':
+                this.updateGameOverScreen();
+                break;
+            case 'levelcomplete':
+                this.updateLevelCompleteScreen();
+                break;
+            case 'pause':
+                this.updatePauseScreen();
+                break;
+            default:
+                break;
+        }
+    }
+    
+    updateHUD() {
+            // Update score
+            if (this.scoreValue) {
+                this.scoreValue.textContent = this.game.state.score.toString().padStart(7, '0');
+            }
+
+            // Update level
+            if (this.levelValue) {
+                this.levelValue.textContent = this.game.state.level.toString().padStart(2, '0');
+            }
+
+            // Update mode indicator
+            if (this.modeIndicator) {
+                const modeText = this.game.state.mode === 'arcade' ? 'ARCADE' : 'PANIC';
+                this.modeIndicator.textContent = modeText;
+                // Add appropriate styling
+                this.modeIndicator.className = 'hud-value';
+                if (this.game.state.mode === 'arcade') {
+                    this.modeIndicator.classList.add('neon');
+                } else {
+                    this.modeIndicator.classList.add('neon'); // Both modes use neon for now
+                }
+            }
+
+            // Update lives
+            if (this.livesDisplay) {
+                this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
+                for (let i = 0; i < this.game.state.lives; i++) {
+                    const life = document.createElement('div');
+                    life.className = 'life';
+                    this.livesDisplay.appendChild(life);
+                }
+            }
+
+            // Update timer (arcade mode only)
+            if (this.timerContainer && this.timerValue) {
+                if (this.game.state.mode === 'arcade') {
+                    this.timerContainer.style.display = 'block';
+                    const minutes = Math.floor(this.game.state.timer / 60);
+                    const seconds = Math.floor(this.game.state.timer % 60);
+                    this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    this.timerContainer.style.display = 'none';
+                }
+            }
+
+            // Update panic bar (panic mode only)
+            if (this.panicBarContainer && this.panicBarFill) {
+                if (this.game.state.mode === 'panic') {
+                    this.panicBarContainer.style.display = 'block';
+                    const progress = Math.min(this.game.state.panicProgress, 100);
+                    this.panicBarFill.style.width = `${progress}%`;
+                } else {
+                    this.panicBarContainer.style.display = 'none';
+                }
+            }
+        }
+
+    // Lightweight per-frame timer update (only rewrites text node)
+    updateTimer() {
+        if (this.timerContainer && this.timerValue && this.game.state.mode === 'arcade') {
+            if (this.timerContainer.style.display !== 'block') {
+                this.timerContainer.style.display = 'block';
+            }
+            const minutes = Math.floor(this.game.state.timer / 60);
+            const seconds = Math.floor(this.game.state.timer % 60);
+            this.timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    updateGameOverScreen() {
+        // Update final score
+        if (this.finalScore) {
+            this.finalScore.textContent = this.game.state.score.toString().padStart(7, '0');
+        }
+        
+        // Update high score (use StorageManager for consistent data handling)
+        if (this.highScoreValue && this.highScoreDisplay && this.game.storageManager) {
+            const highScore = this.game.storageManager.getHighScore(this.game.state.mode);
+            this.highScoreValue.textContent = formatScore(highScore);
+            // Show if we have a high score (greater than 0)
+            this.highScoreDisplay.style.display = highScore > 0 ? 'block' : 'none';
+        }
+    }
+    
+    updateLevelCompleteScreen() {
+        // Update level score - use scoring manager if available
+        if (this.levelScore && this.game && this.game.scoringManager) {
+            this.levelScore.textContent = formatScore(this.game.scoringManager.levelScore);
+        } else if (this.levelScore) {
+            this.levelScore.textContent = '0000000'; // Fallback
+        }
+        
+        // Update level bonus - use scoring manager if available
+        if (this.levelBonus && this.game && this.game.scoringManager) {
+            const bonus = this.game.scoringManager.getLevelCompleteBonus();
+            this.levelBonus.textContent = formatScore(bonus, 6);
+        } else if (this.levelBonus) {
+            this.levelBonus.textContent = '000000'; // Fallback
+        }
+    }
+    
+    updatePauseScreen() {
+        // Nothing to update for pause screen currently
+    }
+    
+    updateStartScreenStats() {
+        if (this.game && this.game.storageManager) {
+            // All values below originate from localStorage -> untrusted, coerce.
+            // Update overall high score
+            if (this.startHighScore) {
+                this.startHighScore.textContent = formatScore(this.game.storageManager.getHighScore());
+            }
+            
+            // Update highest level
+            if (this.startHighestLevel) {
+                this.startHighestLevel.textContent = formatScore(this.game.storageManager.getHighestLevel(), 2);
+            }
+            
+            // Update arcade best score
+            if (this.startArcadeScore) {
+                this.startArcadeScore.textContent = formatScore(this.game.storageManager.getHighScore('arcade'));
+            }
+            
+            // Update panic best score
+            if (this.startPanicScore) {
+                this.startPanicScore.textContent = formatScore(this.game.storageManager.getHighScore('panic'));
+            }
+        }
+    }
+    
+    updateLives(lives) {
+        if (this.livesDisplay) {
+            this.livesDisplay.replaceChildren(); // Clear (no HTML parsing)
+            for (let i = 0; i < lives; i++) {
+                const life = document.createElement('div');
+                life.className = 'life';
+                this.livesDisplay.appendChild(life);
+            }
+        }
+    }
+    
+    reset() {
+            // Reset UI to initial state
+                    this.showScreen('start');
+        
+                    // Update stats display on start screen
+                    this.updateStartScreenStats();
+        
+                    // Reset mode indicator to show default mode (panic as per requirement)
+                    if (this.modeIndicator) {
+                        this.modeIndicator.textContent = 'PANIC';
+                        this.modeIndicator.className = 'hud-value neon';
+                    }
+        
+                    // Hide timer and panic bar initially
+                    if (this.timerContainer) {
+                        this.timerContainer.style.display = 'none';
+                    }
+                    if (this.panicBarContainer) {
+                        this.panicBarContainer.style.display = 'none';
+                    }
+        
+                    // Hide touch controls initially (they'll be shown on touch devices when needed)
+                    this.hideTouchControls();
+        }
+}
+    hideTouchControls() {
+        // Hide touch controls
+        const touchContainer = document.getElementById("touch-controls");
+        if (touchContainer) {
+            touchContainer.style.display = "none";
+        }
+    }
