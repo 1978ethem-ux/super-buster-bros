@@ -58,11 +58,16 @@ body {
     align-items: center;
     text-align: center;
     padding: 20px;
-    pointer-events: none; /* Will be enabled when visible */
+    pointer-events: all
 }
 
 .screen.active {
     display: flex;
+    pointer-events: all;
+}
+
+/* Enable pointer events on UI overlay when screen is active */
+.screen.active #ui-overlay {
     pointer-events: all;
 }
 
