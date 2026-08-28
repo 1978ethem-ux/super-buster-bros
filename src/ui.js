@@ -314,5 +314,76 @@ export class UIManager {
         
                     // Hide touch controls initially (they'll be shown on touch devices when needed)
                     this.hideTouchControls();
+    }
+
+    hideTouchControls() {
+        // Hide touch controls
+        const touchContainer = document.getElementById("touch-controls");
+        if (touchContainer) {
+            touchContainer.style.display = "none";
         }
+    }
+
+    showTouchControls() {
+        // Show touch controls
+        const touchContainer = document.getElementById("touch-controls");
+        if (touchContainer) {
+            touchContainer.style.display = "flex";
+        }
+    }
+
+    createTouchControlVisuals() {
+        // Only create touch controls on touch devices
+        if (!('ontouchstart' in window)) {
+            return;
+        }
+
+        // Create touch zone container
+        const touchContainer = document.createElement('div');
+        touchContainer.id = 'touch-controls';
+        touchContainer.style.cssText =
+            'position: fixed;' +
+            'bottom: 0; left: 0; right: 0;' +
+            'padding: 10px;' +
+            'display: flex;' +
+            'justify-content: space-between;' +
+            'align-items: center;' +
+            'z-index: 100;' +
+            'pointer-events: none;';
+
+        // Create left touch zone (move left)
+        const touchLeft = document.createElement('div');
+        touchLeft.className = 'touch-zone left';
+        touchLeft.style.cssText = 'width: 60px; height: 60px;';
+        const leftGlyph = document.createElement('span');
+        leftGlyph.className = 'touch-glyph';
+        leftGlyph.textContent = '←';
+        touchLeft.appendChild(leftGlyph);
+
+        // Create right touch zone (move right)
+        const touchRight = document.createElement('div');
+        touchRight.className = 'touch-zone right';
+        touchRight.style.cssText = 'width: 60px; height: 60px;';
+        const rightGlyph = document.createElement('span');
+        rightGlyph.className = 'touch-glyph';
+        rightGlyph.textContent = '→';
+        touchRight.appendChild(rightGlyph);
+
+        // Create shoot touch zone
+        const touchShoot = document.createElement('div');
+        touchShoot.className = 'touch-zone shoot';
+        touchShoot.style.cssText = 'width: 60px; height: 60px;';
+        const shootGlyph = document.createElement('span');
+        shootGlyph.className = 'touch-glyph';
+        shootGlyph.textContent = '🔫';
+        touchShoot.appendChild(shootGlyph);
+
+        // Append zones to container
+        touchContainer.appendChild(touchLeft);
+        touchContainer.appendChild(touchRight);
+        touchContainer.appendChild(touchShoot);
+
+        // Append container to body
+        document.body.appendChild(touchContainer);
+    }
 }

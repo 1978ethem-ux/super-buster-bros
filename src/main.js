@@ -6,4 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the game
     const game = new Game();
     game.init();
+    // Expose for debugging (console access)
+    window.game = game;
 });

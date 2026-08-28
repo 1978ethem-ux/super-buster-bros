@@ -19,6 +19,9 @@ export class Player {
         this.animationFrame = 0;
         this.animationTimer = 0;
         this.animationSpeed = 0.1; // seconds per frame
+        
+        // Invulnerability after respawn
+        this.invulnerableTimer = 0;
     }
     
     reset() {
@@ -30,9 +33,19 @@ export class Player {
         this.state = 'idle';
         this.animationFrame = 0;
         this.animationTimer = 0;
+        // Grant temporary invulnerability after respawn (2 seconds)
+        this.invulnerableTimer = 2.0;
     }
     
     update(deltaTime) {
+        // Update invulnerability timer
+        if (this.invulnerableTimer > 0) {
+            this.invulnerableTimer -= deltaTime;
+            if (this.invulnerableTimer <= 0) {
+                this.invulnerableTimer = 0;
+            }
+        }
+        
         if (!this.isAlive) return;
         
         // Handle input
@@ -102,8 +115,8 @@ export class Player {
             0, // Velocity X (straight up)
             -300 // Velocity Y (upwards)
         );
-        
-        // Notify game that player shot
+
+        // Notify game that player shot (for sound, etc.)
         this.game.playerShot();
     }
     
@@ -172,6 +185,9 @@ export class Player {
     
     // Called when player collides with a bubble or enemy
     hit() {
+        // Ignore hits during invulnerability period
+        if (this.invulnerableTimer > 0) return;
+        
         if (!this.isAlive) return;
         
         this.isAlive = false;

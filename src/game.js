@@ -302,7 +302,6 @@ export class Game {
     
     // Player shot a bubble
     playerShot() {
-        this.player.shoot();
         this.audioManager.playSound('shoot');
     }
 }
